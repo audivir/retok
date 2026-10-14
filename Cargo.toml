@@ -1,0 +1,19 @@
+[package]
+name = "retok"
+version = "0.1.0"
+edition = "2024"
+description = "Regex tokenizer and token encoder/decoder in Rust."
+
+[lib]
+crate-type = ["cdylib"]
+name = "_retok"
+
+[dependencies]
+pyo3 = { version = "0.29", features = ["extension-module"] }
+rayon = "1"
+regex = "1"
+
+[profile.release]
+debug = false
+lto = "fat"
+codegen-units = 1

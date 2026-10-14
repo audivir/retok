@@ -1,0 +1,11 @@
+# Changes here will be overwritten by Copier
+_commit: 651b300
+_src_path: gh:audivir/copier-template
+author_email: pypi@audivir.de
+author_name: Tim Hörmann
+description: Regex tokenizer and token encoder/decoder in Rust.
+github_org: audivir
+project_name: retok
+project_slug: retok
+project_type: pyo3
+publishable: true
