@@ -9,7 +9,7 @@ from pathlib import Path
 
 DROPIN = Path(__file__).parents[1] / "dropin" / "retok.py"
 
-if os.environ.get("RETOK_DROPIN"):
+if os.environ.get("RETOK_DROPIN"):  # pragma: no cover
     # runs the tests against the pure-Python dropin, which must give the same results.
     spec = importlib.util.spec_from_file_location("retok", DROPIN)
     assert spec is not None
