@@ -53,9 +53,16 @@ fn enclose(
     if ids.len() < 1 + usize::from(bos_after_first) + usize::from(eos_before_last) {
         return Err(EncodeError::TooFewTokens);
     }
-    let (head, rest) = if bos_after_first { ids.split_at(1) } else { ids.split_at(0) };
-    let (body, tail) =
-        if eos_before_last { rest.split_at(rest.len() - 1) } else { (rest, &[][..]) };
+    let (head, rest) = if bos_after_first {
+        ids.split_at(1)
+    } else {
+        ids.split_at(0)
+    };
+    let (body, tail) = if eos_before_last {
+        rest.split_at(rest.len() - 1)
+    } else {
+        (rest, &[][..])
+    };
     let mut out = Vec::with_capacity(ids.len() + 2);
     out.extend_from_slice(head);
     out.push(bos);
@@ -68,7 +75,11 @@ fn enclose(
 /// Pads rows to the longer of `min_len` and the longest row, then flattens row-major.
 ///
 /// Returns `(flat, lengths, width, needs_pad)`.
-fn pad_rows(rows: &[Vec<i32>], pad: Option<i32>, min_len: usize) -> (Vec<i32>, Vec<i32>, usize, bool) {
+fn pad_rows(
+    rows: &[Vec<i32>],
+    pad: Option<i32>,
+    min_len: usize,
+) -> (Vec<i32>, Vec<i32>, usize, bool) {
     let lengths: Vec<i32> = rows.iter().map(|r| r.len() as i32).collect();
     let width = rows.iter().map(Vec::len).max().unwrap_or(0).max(min_len);
     let needs_pad = rows.iter().any(|r| r.len() < width);
@@ -117,7 +128,10 @@ fn i32_bytes(v: &[i32]) -> Vec<u8> {
 #[pyfunction]
 fn tokenize(pattern: &str, text: &str) -> PyResult<Vec<String>> {
     let re = compile(pattern)?;
-    Ok(tokenize_with(&re, text).into_iter().map(str::to_owned).collect())
+    Ok(tokenize_with(&re, text)
+        .into_iter()
+        .map(str::to_owned)
+        .collect())
 }
 
 /// Encodes texts to padded ids.
@@ -140,7 +154,10 @@ fn encode_with_lengths<'py>(
 ) -> PyResult<(Bound<'py, PyBytes>, Bound<'py, PyBytes>, usize, usize)> {
     let re = compile(pattern)?;
     let get = |t: &str| {
-        token_indices.get(t).copied().ok_or_else(|| PyKeyError::new_err(t.to_owned()))
+        token_indices
+            .get(t)
+            .copied()
+            .ok_or_else(|| PyKeyError::new_err(t.to_owned()))
     };
     let (bos_id, eos_id) = (get(bos)?, get(eos)?);
     let pad_id = token_indices.get(pad).copied();
@@ -166,7 +183,12 @@ fn encode_with_lengths<'py>(
     if needs_pad && pad_id.is_none() {
         return Err(PyKeyError::new_err(pad.to_owned()));
     }
-    Ok((PyBytes::new(py, &i32_bytes(&flat)), PyBytes::new(py, &i32_bytes(&lengths)), n, width))
+    Ok((
+        PyBytes::new(py, &i32_bytes(&flat)),
+        PyBytes::new(py, &i32_bytes(&lengths)),
+        n,
+        width,
+    ))
 }
 
 /// Decodes a row-major native-endian int32 buffer with rows of `width` ids.
@@ -181,7 +203,9 @@ fn decode(
 ) -> PyResult<Vec<String>> {
     let (chunks, remainder) = buffer.as_chunks::<4>();
     if !remainder.is_empty() {
-        return Err(PyValueError::new_err("buffer length must be a multiple of 4"));
+        return Err(PyValueError::new_err(
+            "buffer length must be a multiple of 4",
+        ));
     }
     let flat: Vec<i32> = chunks.iter().map(|c| i32::from_ne_bytes(*c)).collect();
     let special = special_tokens.unwrap_or_default();
@@ -214,6 +238,9 @@ mod tests {
     #[test]
     fn tokenize_words_and_numbers() {
         let re = Regex::new(r"\d+|[A-Za-z]+|[^\s\w]").unwrap();
-        assert_eq!(tokenize_with(&re, "foo 12, bar!"), ["foo", "12", ",", "bar", "!"]);
+        assert_eq!(
+            tokenize_with(&re, "foo 12, bar!"),
+            ["foo", "12", ",", "bar", "!"]
+        );
     }
 }
