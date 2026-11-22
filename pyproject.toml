@@ -124,6 +124,9 @@ ban-relative-imports = "all"
 # Stub files for C extensions are allowed to have docstrings and overwrite __doc__, __version__, etc.
 "_*.pyi" = ["PYI021", "A"]
 
+# dropin/retok.py is a single file to copy, and its signatures mirror the compiled package.
+"dropin/*.py" = ["INP001", "PLR0913", "PLR0917"]
+
 # conf.py automatically created by Sphinx
 "docs/conf.py" = ["INP001", "D100", "ERA001", "A"]
 

@@ -34,3 +34,5 @@ jobs:
       - run: uv run coverage run -m pytest
       - run: uv run coverage combine || true
       - run: uv run coverage report
+      - name: Run the tests against the pure-Python dropin
+        run: RETOK_DROPIN=1 uv run pytest -p no:cacheprovider
